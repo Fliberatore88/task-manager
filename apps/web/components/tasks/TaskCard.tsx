@@ -12,145 +12,166 @@ interface TaskCardProps {
   onDelete: (task: Task) => void;
 }
 
-const priorityAccent: Record<string, string> = {
-  high:   'rgba(248,113,113,0.8)',
-  medium: 'rgba(251,146,60,0.7)',
-  low:    'rgba(100,116,139,0.5)',
+const statusBorderVar: Record<string, string> = {
+  pending:      'var(--status-pending)',
+  'in-progress':'var(--status-progress)',
+  completed:    'var(--status-completed)',
 };
 
-// Full-card tint by status — stronger on in-progress/completed to fight the blue bg
-const statusCardBg: Record<string, string> = {
-  pending:      'rgba(251, 191, 36,  0.10)',
-  'in-progress':'rgba(34, 211, 238, 0.14)',   // cyan — contrasts vs blue bg
-  completed:    'rgba(52,  211, 153, 0.14)',
+const cardBgVar: Record<string, string> = {
+  pending:      'var(--card-bg-pending)',
+  'in-progress':'var(--card-bg-progress)',
+  completed:    'var(--card-bg-completed)',
+};
+
+const priorityDot: Record<string, string> = {
+  high:   'var(--danger)',
+  medium: 'var(--warning)',
+  low:    'var(--text-muted)',
+};
+
+const statusLabel: Record<string, string> = {
+  pending:      'Pending',
+  'in-progress':'In Progress',
+  completed:    'Completed',
+};
+
+const priorityLabel: Record<string, string> = {
+  high:   'High',
+  medium: 'Medium',
+  low:    'Low',
 };
 
 export function TaskCard({ task, index = 0, isExiting = false, onEdit, onDelete }: TaskCardProps) {
   const overdue = isOverdue(task.dueDate, task.status);
-  const accent  = priorityAccent[task.priority];
-  const cardBg  = statusCardBg[task.status] ?? 'transparent';
+  const borderColor = statusBorderVar[task.status] ?? 'var(--border)';
+  const cardBg = cardBgVar[task.status] ?? 'var(--bg-card)';
 
   return (
-    <div
-      className={`group relative rounded-xl p-4 transition-all duration-200 ${
-        isExiting ? 'animate-fade-out pointer-events-none' : 'animate-fade-in-up'
-      }`}
-      style={{
-        background: `linear-gradient(145deg, ${cardBg} 0%, var(--bg-card) 60%)`,
-        border: '1px solid var(--border)',
-        backdropFilter: 'blur(8px)',
-        animationDelay: isExiting ? '0ms' : `${index * 45}ms`,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+    <article
+      tabIndex={0}
+      onClick={(e) => {
+        if (!(e.target as HTMLElement).closest('.task-action-bar')) {
+          (e.currentTarget as HTMLElement).focus();
+        }
       }}
-      onMouseEnter={e => {
-        const el = e.currentTarget;
-        el.style.borderColor = 'rgba(99,102,241,0.3)';
-        el.style.transform = 'translateY(-2px)';
-        el.style.boxShadow = `0 8px 28px rgba(0,0,0,0.35), 0 0 0 1px rgba(99,102,241,0.12)`;
-      }}
-      onMouseLeave={e => {
-        const el = e.currentTarget;
-        el.style.borderColor = 'var(--border)';
-        el.style.transform = 'translateY(0)';
-        el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.25)';
-      }}
+      className={`card flex flex-col overflow-hidden focus:outline-none ${isExiting ? 'animate-fade-out' : 'animate-fade-in-up'}`}
+      style={{ animationDelay: `${index * 40}ms`, background: cardBg }}
     >
-      {/* Priority accent line */}
-      <div
-        className="absolute left-0 top-3 bottom-3 w-0.5 rounded-full"
-        style={{ background: accent }}
-      />
+      {/* Status stripe */}
+      <div className="h-0.5 w-full" style={{ background: borderColor, opacity: 0.7 }} />
 
-      <div className="pl-3">
-        {/* Header */}
-        <div className="flex items-start justify-between gap-2 mb-2">
+      <div className="flex flex-col gap-3 p-4 flex-1">
+        {/* Title row */}
+        <div className="flex items-start justify-between gap-2">
           <h3
-            className="font-medium leading-snug line-clamp-2 flex-1 text-sm"
+            className="text-sm font-semibold leading-snug line-clamp-2 flex-1"
             style={{ color: 'var(--text-primary)' }}
           >
             {task.title}
           </h3>
-          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-            <button
-              onClick={() => onEdit(task)}
-              className="p-1.5 rounded-lg transition-colors"
-              style={{ color: 'var(--text-muted)' }}
-              onMouseEnter={e => {
-                e.currentTarget.style.color = '#818cf8';
-                e.currentTarget.style.background = 'rgba(99,102,241,0.1)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.color = 'var(--text-muted)';
-                e.currentTarget.style.background = 'transparent';
-              }}
-              title="Edit"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-            </button>
-            <button
-              onClick={() => onDelete(task)}
-              className="p-1.5 rounded-lg transition-colors"
-              style={{ color: 'var(--text-muted)' }}
-              onMouseEnter={e => {
-                e.currentTarget.style.color = '#f87171';
-                e.currentTarget.style.background = 'rgba(248,113,113,0.1)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.color = 'var(--text-muted)';
-                e.currentTarget.style.background = 'transparent';
-              }}
-              title="Delete"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-            </button>
-          </div>
+          {/* Priority dot */}
+          <div
+            className="w-2 h-2 rounded-full shrink-0 mt-1"
+            title={`${priorityLabel[task.priority]} priority`}
+            style={{ background: priorityDot[task.priority] ?? 'var(--text-muted)' }}
+          />
         </div>
 
         {/* Description */}
         {task.description && (
-          <p className="text-xs mb-3 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
+          <p
+            className="text-xs leading-relaxed line-clamp-2"
+            style={{ color: 'var(--text-secondary)' }}
+          >
             {task.description}
           </p>
         )}
 
         {/* Badges */}
-        <div className="flex flex-wrap items-center gap-1.5 mb-3">
-          <Badge variant={task.status}>{task.status}</Badge>
-          <Badge variant={task.priority}>{task.priority}</Badge>
-          {overdue && <Badge variant="overdue">overdue</Badge>}
+        <div className="flex flex-wrap gap-1.5">
+          <Badge variant={task.status}>{statusLabel[task.status]}</Badge>
+          <Badge variant={task.priority}>{priorityLabel[task.priority]}</Badge>
+          {overdue && <Badge variant="overdue">Overdue</Badge>}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between">
-          <div>
-            {task.assignee && (
-              <div className="flex items-center gap-1.5">
-                <div
-                  className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-semibold"
-                  style={{ background: 'rgba(99,102,241,0.2)', color: '#818cf8' }}
-                >
-                  {task.assignee.charAt(0).toUpperCase()}
-                </div>
-                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
-                  {task.assignee}
-                </span>
+        {/* Meta */}
+        <div className="flex items-center gap-3 mt-auto pt-1">
+          {task.assignee && (
+            <div className="flex items-center gap-1.5 min-w-0">
+              <div
+                className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"
+                style={{
+                  background: 'var(--accent-subtle)',
+                  color:      'var(--accent)',
+                  fontSize:   '9px',
+                }}
+              >
+                {task.assignee.charAt(0).toUpperCase()}
               </div>
-            )}
-          </div>
+              <span className="text-xs truncate" style={{ color: 'var(--text-secondary)' }}>
+                {task.assignee}
+              </span>
+            </div>
+          )}
           {task.dueDate && (
-            <span
-              className="text-xs"
-              style={{ color: overdue ? '#f87171' : 'var(--text-muted)' }}
+            <div
+              className="flex items-center gap-1 ml-auto shrink-0"
+              style={{ color: overdue ? 'var(--danger)' : 'var(--text-muted)' }}
             >
-              {formatDate(task.dueDate)}
-            </span>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <span className="text-xs font-medium">{formatDate(task.dueDate)}</span>
+            </div>
           )}
         </div>
       </div>
-    </div>
+
+      {/* Action bar — always visible on touch, hover-revealed on desktop */}
+      <div
+        className="task-action-bar flex items-center justify-end gap-1.5 px-4 py-2.5"
+        style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-surface)' }}
+      >
+        <button
+          onClick={() => onEdit(task)}
+          aria-label="Edit task"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all duration-150"
+          style={{ color: 'var(--text-secondary)', background: 'transparent' }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--accent-subtle)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--accent)';
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
+          }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Edit
+        </button>
+        <button
+          onClick={() => onDelete(task)}
+          aria-label="Delete task"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-all duration-150"
+          style={{ color: 'var(--text-muted)', background: 'transparent' }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--danger-subtle)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--danger)';
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)';
+          }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+          </svg>
+          Delete
+        </button>
+      </div>
+    </article>
   );
 }

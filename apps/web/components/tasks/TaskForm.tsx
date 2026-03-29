@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CreateTaskSchema, type CreateTaskDto, type Task } from '@task-manager/shared';
 
 interface TaskFormProps {
-  initialValues?: Partial<Task>;
+  initialValues?: Task;
   onSubmit: (data: CreateTaskDto) => Promise<void>;
   onCancel: () => void;
   submitLabel?: string;
@@ -13,22 +13,24 @@ interface TaskFormProps {
 
 function toDateInputValue(iso: string | null | undefined): string {
   if (!iso) return '';
-  return iso.slice(0, 10);
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toISOString().slice(0, 10);
 }
 
-const today = new Date().toISOString().slice(0, 10);
+const labelStyle = {
+  display:    'block',
+  fontSize:   '0.75rem',
+  fontWeight: '500',
+  marginBottom: '0.375rem',
+  color:      'var(--text-secondary)',
+} as React.CSSProperties;
 
-const fieldStyle: React.CSSProperties = {
-  width: '100%',
-  background: 'var(--bg-surface)',
-  border: '1px solid var(--border)',
-  borderRadius: '8px',
-  padding: '8px 12px',
-  fontSize: '13px',
-  color: 'var(--text-primary)',
-  outline: 'none',
-  transition: 'border-color 0.15s',
-};
+const errorStyle = {
+  fontSize: '0.7rem',
+  color:    'var(--danger)',
+  marginTop: '0.25rem',
+} as React.CSSProperties;
 
 export function TaskForm({ initialValues, onSubmit, onCancel, submitLabel = 'Create Task' }: TaskFormProps) {
   const {
@@ -37,65 +39,64 @@ export function TaskForm({ initialValues, onSubmit, onCancel, submitLabel = 'Cre
     formState: { errors, isSubmitting },
   } = useForm<CreateTaskDto>({
     resolver: zodResolver(CreateTaskSchema),
-    defaultValues: {
-      title: initialValues?.title ?? '',
-      description: initialValues?.description ?? '',
-      status: initialValues?.status ?? 'pending',
-      priority: initialValues?.priority ?? 'medium',
-      dueDate: toDateInputValue(initialValues?.dueDate),
-      assignee: initialValues?.assignee ?? '',
-    },
+    defaultValues: initialValues
+      ? {
+          title:       initialValues.title,
+          description: initialValues.description ?? undefined,
+          status:      initialValues.status,
+          priority:    initialValues.priority,
+          dueDate:     toDateInputValue(initialValues.dueDate) || undefined,
+          assignee:    initialValues.assignee ?? undefined,
+        }
+      : { status: 'pending', priority: 'medium' },
   });
 
-  const labelClass = 'block text-xs font-medium mb-1.5';
-  const errorClass = 'mt-1 text-xs text-red-400';
-
-  const focusBorder = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-    (e.currentTarget.style.borderColor = 'var(--border-accent)');
-  const blurBorder = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-    (e.currentTarget.style.borderColor = 'var(--border)');
+  const fieldClass = 'field-input';
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
+      {/* Title */}
       <div>
-        <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>
-          Title <span style={{ color: '#f87171' }}>*</span>
+        <label htmlFor="task-title" style={labelStyle}>
+          Title <span style={{ color: 'var(--danger)' }}>*</span>
         </label>
         <input
+          id="task-title"
+          type="text"
+          placeholder="What needs to be done?"
+          className={fieldClass}
           {...register('title')}
-          style={fieldStyle}
-          placeholder="e.g. Fix authentication bug"
-          onFocus={focusBorder}
-          onBlur={blurBorder}
         />
-        {errors.title && <p className={errorClass}>{errors.title.message}</p>}
+        {errors.title && <p style={errorStyle}>{errors.title.message}</p>}
       </div>
 
+      {/* Description */}
       <div>
-        <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Description</label>
+        <label htmlFor="task-desc" style={labelStyle}>Description</label>
         <textarea
-          {...register('description')}
+          id="task-desc"
           rows={3}
-          style={{ ...fieldStyle, resize: 'none' }}
-          placeholder="Optional details about this task…"
-          onFocus={focusBorder}
-          onBlur={blurBorder}
+          placeholder="Add details (optional)…"
+          className={fieldClass}
+          style={{ resize: 'vertical' }}
+          {...register('description')}
         />
-        {errors.description && <p className={errorClass}>{errors.description.message}</p>}
+        {errors.description && <p style={errorStyle}>{errors.description.message}</p>}
       </div>
 
+      {/* Status + Priority row */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Status</label>
-          <select {...register('status')} style={fieldStyle} onFocus={focusBorder} onBlur={blurBorder}>
+          <label htmlFor="task-status" style={labelStyle}>Status</label>
+          <select id="task-status" className={fieldClass} {...register('status')}>
             <option value="pending">Pending</option>
             <option value="in-progress">In Progress</option>
             <option value="completed">Completed</option>
           </select>
         </div>
         <div>
-          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Priority</label>
-          <select {...register('priority')} style={fieldStyle} onFocus={focusBorder} onBlur={blurBorder}>
+          <label htmlFor="task-priority" style={labelStyle}>Priority</label>
+          <select id="task-priority" className={fieldClass} {...register('priority')}>
             <option value="low">Low</option>
             <option value="medium">Medium</option>
             <option value="high">High</option>
@@ -103,57 +104,62 @@ export function TaskForm({ initialValues, onSubmit, onCancel, submitLabel = 'Cre
         </div>
       </div>
 
+      {/* Due date + Assignee row */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Due Date</label>
-          <input
-            type="date"
-            min={today}
-            {...register('dueDate')}
-            style={{ ...fieldStyle, colorScheme: 'dark' }}
-            onFocus={focusBorder}
-            onBlur={blurBorder}
-          />
-          {errors.dueDate && <p className={errorClass}>{errors.dueDate.message}</p>}
+          <label htmlFor="task-due" style={labelStyle}>Due Date</label>
+          <input id="task-due" type="date" className={fieldClass} {...register('dueDate')} />
+          {errors.dueDate && <p style={errorStyle}>{errors.dueDate.message}</p>}
         </div>
         <div>
-          <label className={labelClass} style={{ color: 'var(--text-secondary)' }}>Assignee</label>
+          <label htmlFor="task-assignee" style={labelStyle}>Assignee</label>
           <input
+            id="task-assignee"
+            type="text"
+            placeholder="Name or email"
+            className={fieldClass}
             {...register('assignee')}
-            style={fieldStyle}
-            placeholder="e.g. john.doe"
-            onFocus={focusBorder}
-            onBlur={blurBorder}
           />
         </div>
       </div>
 
-      <div className="flex justify-end gap-2 pt-1">
+      {/* Actions */}
+      <div className="flex justify-end gap-2.5 pt-1">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
-          style={{ color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border)' }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.09)')}
-          onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+          className="px-4 py-2 text-sm font-medium rounded-lg cursor-pointer transition-all duration-150"
+          style={{
+            color:      'var(--text-secondary)',
+            background: 'var(--bg-surface)',
+            border:     '1px solid var(--border)',
+          }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-hover)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)';
+          }}
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-all disabled:opacity-50 flex items-center gap-2"
+          className="px-5 py-2 text-sm font-semibold text-white rounded-lg cursor-pointer transition-all duration-150 disabled:opacity-50 flex items-center gap-2"
           style={{ background: 'var(--accent)', boxShadow: '0 0 16px var(--accent-glow)' }}
-          onMouseEnter={e => (e.currentTarget.style.background = '#818cf8')}
-          onMouseLeave={e => (e.currentTarget.style.background = 'var(--accent)')}
+          onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = 'var(--accent-hover)'}
+          onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = 'var(--accent)'}
         >
           {isSubmitting && (
-            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+            <svg className="w-3.5 h-3.5 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
             </svg>
           )}
-          {submitLabel}
+          {isSubmitting ? 'Saving…' : submitLabel}
         </button>
       </div>
     </form>

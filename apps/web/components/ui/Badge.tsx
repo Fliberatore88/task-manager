@@ -1,16 +1,16 @@
 import { cn } from '@/lib/utils';
 
-const variants = {
-  pending:      'bg-amber-400/10  text-amber-300  border border-amber-400/20',
-  'in-progress':'bg-cyan-400/10 text-cyan-300 border border-cyan-400/20',
-  completed:    'bg-emerald-400/10 text-emerald-300 border border-emerald-400/20',
-  low:          'bg-slate-400/10  text-slate-400  border border-slate-500/20',
-  medium:       'bg-orange-400/10 text-orange-300 border border-orange-400/20',
-  high:         'bg-red-400/10    text-red-300    border border-red-400/20',
-  overdue:      'bg-red-500/20    text-red-300    border border-red-500/30',
+const keyMap: Record<string, string> = {
+  pending:      'pending',
+  'in-progress':'progress',
+  completed:    'done',
+  low:          'low',
+  medium:       'medium',
+  high:         'high',
+  overdue:      'overdue',
 };
 
-type BadgeVariant = keyof typeof variants;
+type BadgeVariant = keyof typeof keyMap;
 
 export function Badge({
   variant,
@@ -21,13 +21,18 @@ export function Badge({
   children: React.ReactNode;
   className?: string;
 }) {
+  const k = keyMap[variant] ?? variant;
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-        variants[variant],
+        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium border',
         className,
       )}
+      style={{
+        background:   `var(--badge-${k}-bg)`,
+        color:        `var(--badge-${k}-text)`,
+        borderColor:  `var(--badge-${k}-border)`,
+      }}
     >
       {children}
     </span>

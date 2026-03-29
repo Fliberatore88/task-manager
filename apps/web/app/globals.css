@@ -1,79 +1,259 @@
 @import "tailwindcss";
 
+/* ── Dark theme (default) ──────────────────────────────────────── */
 :root {
-  --bg-base:     #0b1628;
-  --bg-surface:  #0f1d35;
-  --bg-card:     #132440;
-  --bg-elevated: #172a4a;
-  --border:      rgba(99, 149, 210, 0.12);
-  --border-accent: rgba(99, 102, 241, 0.45);
-  --text-primary:  #e2e8f0;
-  --text-secondary: #7e9ab8;
-  --text-muted:  #4a6480;
-  --accent:      #6366f1;
-  --accent-glow: rgba(99, 102, 241, 0.2);
+  color-scheme: dark;
+  --bg-base:       #0b1628;
+  --bg-surface:    #0f1d35;
+  --bg-card:       #132440;
+  --bg-elevated:   #172a4a;
+  --border:        rgba(148,163,184,0.08);
+  --border-hover:  rgba(148,163,184,0.18);
+  --text-primary:  #f1f5f9;
+  --text-secondary:#94a3b8;
+  --text-muted:    #475569;
+  --accent:        #6366f1;
+  --accent-hover:  #818cf8;
+  --accent-glow:   rgba(99,102,241,0.2);
+  --accent-subtle: rgba(99,102,241,0.08);
+  --danger:        #ef4444;
+  --danger-subtle: rgba(239,68,68,0.1);
+  --success:       #10b981;
+  --warning:       #f59e0b;
+  --info:          #06b6d4;
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:  0 4px 20px rgba(0,0,0,0.5);
+  --shadow-lg:  0 20px 60px rgba(0,0,0,0.6);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.3);
+  --radius:     12px;
+
+  /* Status left-border colors */
+  --status-pending:    #f59e0b;
+  --status-progress:   #06b6d4;
+  --status-completed:  #10b981;
+
+  /* Card body tint per status — dark: no tint, keep the navy */
+  --card-bg-pending:   var(--bg-card);
+  --card-bg-progress:  var(--bg-card);
+  --card-bg-completed: var(--bg-card);
+
+  /* Badge vars */
+  --badge-pending-bg:      rgba(245,158,11,0.1);
+  --badge-pending-text:    #fcd34d;
+  --badge-pending-border:  rgba(245,158,11,0.22);
+
+  --badge-progress-bg:     rgba(6,182,212,0.1);
+  --badge-progress-text:   #67e8f9;
+  --badge-progress-border: rgba(6,182,212,0.22);
+
+  --badge-done-bg:         rgba(16,185,129,0.1);
+  --badge-done-text:       #6ee7b7;
+  --badge-done-border:     rgba(16,185,129,0.22);
+
+  --badge-low-bg:          rgba(100,116,139,0.1);
+  --badge-low-text:        #94a3b8;
+  --badge-low-border:      rgba(100,116,139,0.2);
+
+  --badge-medium-bg:       rgba(249,115,22,0.1);
+  --badge-medium-text:     #fb923c;
+  --badge-medium-border:   rgba(249,115,22,0.22);
+
+  --badge-high-bg:         rgba(239,68,68,0.1);
+  --badge-high-text:       #fca5a5;
+  --badge-high-border:     rgba(239,68,68,0.22);
+
+  --badge-overdue-bg:      rgba(239,68,68,0.15);
+  --badge-overdue-text:    #f87171;
+  --badge-overdue-border:  rgba(239,68,68,0.3);
 }
 
+/* ── Light theme ───────────────────────────────────────────────── */
+[data-theme="light"] {
+  color-scheme: light;
+  --bg-base:       #ddeeff;
+  --bg-surface:    #edf6ff;
+  --bg-card:       #f4faff;
+  --bg-elevated:   #e8f3fc;
+  --border:        rgba(15,23,42,0.08);
+  --border-hover:  rgba(15,23,42,0.18);
+  --text-primary:  #0f172a;
+  --text-secondary:#475569;
+  --text-muted:    #94a3b8;
+  --accent:        #0d9488;
+  --accent-hover:  #0f766e;
+  --accent-glow:   rgba(13,148,136,0.18);
+  --accent-subtle: rgba(13,148,136,0.07);
+  --danger:        #dc2626;
+  --danger-subtle: rgba(220,38,38,0.08);
+  --success:       #059669;
+  --warning:       #d97706;
+  --info:          #0891b2;
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.07);
+  --shadow-md:  0 4px 20px rgba(0,0,0,0.09);
+  --shadow-lg:  0 20px 60px rgba(0,0,0,0.12);
+  --shadow-card: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+
+  --status-pending:   #d97706;
+  --status-progress:  #0891b2;
+  --status-completed: #059669;
+
+  /* Card body tint per status — light: subtle color wash on whole card */
+  --card-bg-pending:   color-mix(in srgb, #d97706 6%, var(--bg-card));
+  --card-bg-progress:  color-mix(in srgb, #0891b2 6%, var(--bg-card));
+  --card-bg-completed: color-mix(in srgb, #059669 6%, var(--bg-card));
+
+  --badge-pending-bg:      rgba(217,119,6,0.08);
+  --badge-pending-text:    #92400e;
+  --badge-pending-border:  rgba(217,119,6,0.25);
+
+  --badge-progress-bg:     rgba(8,145,178,0.08);
+  --badge-progress-text:   #155e75;
+  --badge-progress-border: rgba(8,145,178,0.25);
+
+  --badge-done-bg:         rgba(5,150,105,0.08);
+  --badge-done-text:       #065f46;
+  --badge-done-border:     rgba(5,150,105,0.25);
+
+  --badge-low-bg:          rgba(100,116,139,0.08);
+  --badge-low-text:        #475569;
+  --badge-low-border:      rgba(100,116,139,0.2);
+
+  --badge-medium-bg:       rgba(234,88,12,0.08);
+  --badge-medium-text:     #9a3412;
+  --badge-medium-border:   rgba(234,88,12,0.22);
+
+  --badge-high-bg:         rgba(220,38,38,0.08);
+  --badge-high-text:       #991b1b;
+  --badge-high-border:     rgba(220,38,38,0.2);
+
+  --badge-overdue-bg:      rgba(220,38,38,0.1);
+  --badge-overdue-text:    #b91c1c;
+  --badge-overdue-border:  rgba(220,38,38,0.25);
+}
+
+/* ── Theme transition ──────────────────────────────────────────── */
 @theme inline {
   --color-background: var(--bg-base);
   --color-foreground: var(--text-primary);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-jakarta), system-ui, sans-serif;
 }
 
 body {
-  background: var(--bg-base);
+  /* Dark default: warm navy radial gradient */
+  background: radial-gradient(ellipse at 25% 0%, #1a3560 0%, #0b1628 45%, #07101f 100%);
   color: var(--text-primary);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
 }
 
-/* ─── Scrollbar ─────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+/* Light: flat blue-tinted background */
+[data-theme="light"] body {
+  background: var(--bg-base);
+  transition: background 0.25s ease;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.18); }
+::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 99px; }
 
-/* ─── Keyframes ─────────────────────────────────────── */
+/* ── Focus ring ────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Task card action bar ──────────────────────────────────────── */
+/* Hidden by default; revealed on hover (desktop) or focus-within (tap on touch) */
+.task-action-bar {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.card:hover .task-action-bar,
+.card:focus-within .task-action-bar { opacity: 1; }
+
+/* ── Card component ────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+.card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* ── Form inputs ───────────────────────────────────────────────── */
+.field-input {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+  -webkit-appearance: none;
+}
+.field-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.field-input::placeholder { color: var(--text-muted); }
+.field-input:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Keyframes ─────────────────────────────────────────────────── */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0);    }
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes fadeInScale {
-  from { opacity: 0; transform: scale(0.94); }
-  to   { opacity: 1; transform: scale(1);    }
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
 }
-
 @keyframes fadeOut {
-  from { opacity: 1; transform: scale(1)    translateY(0);  }
-  to   { opacity: 0; transform: scale(0.92) translateY(-6px); }
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.94) translateY(-5px); }
 }
-
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(16px); }
-  to   { opacity: 1; transform: translateX(0);    }
+  from { opacity: 0; transform: translateX(10px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
-
 @keyframes shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position:  400px 0; }
+  0%   { background-position: -500px 0; }
+  100% { background-position:  500px 0; }
 }
 
-/* ─── Animation classes ─────────────────────────────── */
-.animate-fade-in-up    { animation: fadeInUp    0.38s ease both; }
-.animate-fade-in-scale { animation: fadeInScale 0.28s ease both; }
-.animate-fade-out      { animation: fadeOut     0.26s ease both; }
-.animate-slide-in      { animation: slideInRight 0.3s ease both; }
+/* ── Animation classes ─────────────────────────────────────────── */
+.animate-fade-in-up    { animation: fadeInUp    0.35s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-in-scale { animation: fadeInScale 0.25s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-out      { animation: fadeOut     0.22s ease both; }
+.animate-slide-in      { animation: slideInRight 0.28s cubic-bezier(0.16,1,0.3,1) both; }
 
-/* ─── Skeleton shimmer ──────────────────────────────── */
+/* ── Skeleton shimmer ──────────────────────────────────────────── */
 .skeleton {
   background: linear-gradient(
     90deg,
-    rgba(255,255,255,0.04) 25%,
-    rgba(255,255,255,0.08) 50%,
-    rgba(255,255,255,0.04) 75%
+    var(--border) 25%,
+    var(--border-hover) 50%,
+    var(--border) 75%
   );
-  background-size: 400px 100%;
-  animation: shimmer 1.4s infinite linear;
-  border-radius: 8px;
+  background-size: 500px 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: 6px;
+}
+
+/* ── Reduced motion ────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
