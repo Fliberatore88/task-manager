@@ -55,67 +55,129 @@ Two apps (`api`, `web`) and one shared package (`shared`) under a single root. N
 
 ---
 
-## Prerequisites
+## Running the project
 
-- **Node.js 20+** — required for both apps. The system may have an older Node default; use nvm.
-- **nvm** — to switch Node versions per terminal
-- **npm 10+**
-
-> **Note:** `apps/web` uses Next.js 16 which requires Node 20+. `apps/api` also runs better on Node 20 to avoid compilation edge cases.
+There are two ways to run the project. **Docker is recommended** — it requires no local Node setup and handles everything automatically.
 
 ---
 
-## First-time Setup
+### Option 1 — Docker (recommended)
+
+**Prerequisite:** [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Mac/Windows) or Docker + Docker Compose (Linux).
 
 ```bash
-# 1. Switch to Node 20
-source ~/.nvm/nvm.sh && nvm use 20
+docker compose up --build
+```
 
-# 2. Install all dependencies from the monorepo root
-npm install
+That's it. The first build takes ~3–4 minutes (downloads Node image, installs dependencies, compiles TypeScript, runs migrations). Subsequent starts use the cached image and take a few seconds.
 
-# 3. Build the shared package (Zod schemas used by both apps)
-cd packages/shared && npx tsc && cd ../..
+| Service | URL |
+|---------|-----|
+| Web app | http://localhost:3000 |
+| REST API | http://localhost:3001 |
+| Swagger docs | http://localhost:3001/api/docs |
 
-# 4. Run database migrations (creates dev.db)
-cd apps/api && npx prisma migrate dev && cd ../..
+Docker handles everything automatically:
+- Correct Node.js version (20)
+- All dependency installation
+- Shared package compilation
+- SQLite database creation
+- Prisma migrations
+
+The database persists in a named Docker volume (`db-data`) — data survives container restarts.
+
+**Accessing from other devices on the same network** (phone, tablet):
+
+Find your machine's local IP (`ip addr` / `ifconfig` / System Preferences → Network), then:
+
+```bash
+NEXT_PUBLIC_API_URL=http://<your-ip>:3001 docker compose up --build
+```
+
+**Useful commands:**
+
+```bash
+docker compose up --build      # build images and start (first time or after code changes)
+docker compose up              # start with existing images (faster)
+docker compose down            # stop containers, preserve database
+docker compose down -v         # stop containers and delete database volume
+docker compose logs -f api     # tail API logs
+docker compose logs -f web     # tail web logs
 ```
 
 ---
 
-## Running in Development
+### Option 2 — Local (without Docker)
 
-Both terminals need Node 20. Open two terminals from the **monorepo root**:
+**Prerequisites:**
+- **Node.js 20+** — required by both apps. If your system has an older default, use nvm.
+- **nvm** — to switch Node versions
+- **npm 10+**
+
+#### Step 1 — Create environment files
+
+These files are gitignored and must be created manually.
+
+**`apps/api/.env`**
+```
+DATABASE_URL="file:./dev.db"
+PORT=3001
+FRONTEND_URL=http://localhost:3000
+```
+
+**`apps/web/.env.local`**
+```
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+> For access from other devices on the network, set `NEXT_PUBLIC_API_URL=http://<your-ip>:3001` in `apps/web/.env.local`.
+
+#### Step 2 — Install and build
+
+Run these commands once from the **monorepo root**:
 
 ```bash
-# Terminal 1 — API (http://localhost:3001)
+# Switch to Node 20
+source ~/.nvm/nvm.sh && nvm use 20
+
+# Install all dependencies (all workspaces)
+npm install
+
+# Compile the shared Zod schemas package
+cd packages/shared && npx tsc && cd ../..
+
+# Create the SQLite database and run migrations
+cd apps/api && npx prisma migrate dev && cd ../..
+```
+
+#### Step 3 — Start both servers
+
+Open **two terminals** from the monorepo root, both with Node 20:
+
+```bash
+# Terminal 1 — API  →  http://localhost:3001
 source ~/.nvm/nvm.sh && nvm use 20
 npm run dev:api
 ```
 
 ```bash
-# Terminal 2 — Web (http://localhost:3000)
+# Terminal 2 — Web  →  http://localhost:3000
 source ~/.nvm/nvm.sh && nvm use 20
 npm run dev:web
 ```
 
-> The API script runs `nest build` then `node dist/main`. Hot-reloading requires re-running `npm run dev:api` after source changes.
-
-### API Documentation (Swagger)
-
-With the API running: [http://localhost:3001/api/docs](http://localhost:3001/api/docs)
+> The API script runs `nest build` then starts the compiled output. After changing API source files, re-run `npm run dev:api` to pick up changes.
 
 ---
 
 ## Tests
 
-```bash
-# From the monorepo root — runs all backend unit tests
-source ~/.nvm/nvm.sh && nvm use 20
-npm test
+Tests run against the backend only (unit tests for domain entities and use cases, with repository mocked). No database required.
 
-# Watch mode
-npm run test:watch
+```bash
+source ~/.nvm/nvm.sh && nvm use 20
+npm test             # run all tests once
+npm run test:watch   # watch mode
 ```
 
 ---
@@ -131,22 +193,17 @@ npm run test:watch
 | `PUT` | `/api/tasks/:id` | Update a task |
 | `DELETE` | `/api/tasks/:id` | Delete a task |
 
-**Query params for `GET /api/tasks`:** `status`, `priority`, `assignee`, `sortBy` (`dueDate` | `priority` | `createdAt`), `sortOrder` (`asc` | `desc`)
+**Query params for `GET /api/tasks`:**
 
----
+| Param | Values | Default |
+|-------|--------|---------|
+| `status` | `pending` · `in-progress` · `completed` | — |
+| `priority` | `low` · `medium` · `high` | — |
+| `assignee` | any string (partial match) | — |
+| `sortBy` | `createdAt` · `dueDate` · `priority` | `createdAt` |
+| `sortOrder` | `asc` · `desc` | `desc` |
 
-## Environment Variables
-
-**`apps/api/.env`**
-```
-DATABASE_URL="file:./dev.db"
-PORT=3001
-```
-
-**`apps/web/.env.local`**
-```
-NEXT_PUBLIC_API_URL=http://localhost:3001
-```
+Full interactive documentation available at **http://localhost:3001/api/docs** (Swagger UI).
 
 ---
 

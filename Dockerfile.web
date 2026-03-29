@@ -1,0 +1,48 @@
+# ── Stage 1: Build ─────────────────────────────────────────────────
+FROM node:20-slim AS builder
+
+# NEXT_PUBLIC_* vars must be present at build time (baked into client bundle)
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+WORKDIR /app
+
+# Copy workspace manifests + root tsconfig for better layer caching
+COPY package.json package-lock.json tsconfig.base.json ./
+COPY packages/shared/package.json ./packages/shared/
+COPY apps/web/package.json ./apps/web/
+
+# Install all dependencies
+RUN npm install
+
+# Copy source code
+COPY packages/shared/ ./packages/shared/
+COPY apps/web/ ./apps/web/
+
+# Build shared package then Next.js
+RUN npm run build --workspace=packages/shared && \
+    npm run build --workspace=apps/web
+
+# ── Stage 2: Runtime ────────────────────────────────────────────────
+FROM node:20-slim AS runner
+
+WORKDIR /app
+
+# Copy only the built Next.js output and its runtime dependencies
+# (npm workspaces hoists all packages to root node_modules — no workspace-level node_modules)
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/packages/shared/package.json ./packages/shared/package.json
+COPY --from=builder /app/apps/web/.next ./apps/web/.next
+COPY --from=builder /app/apps/web/public ./apps/web/public
+COPY --from=builder /app/apps/web/package.json ./apps/web/package.json
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV PATH="/app/node_modules/.bin:${PATH}"
+
+EXPOSE 3000
+
+WORKDIR /app/apps/web
+
+CMD ["next", "start", "--port", "3000"]
