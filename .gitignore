@@ -1,0 +1,11 @@
+node_modules/
+.next/
+dist/
+coverage/
+*.db
+*.db-journal
+.env
+.env.local
+.env*.local
+!.env.example
+.DS_Store
