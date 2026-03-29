@@ -17,6 +17,7 @@ export const CreateTaskSchema = z.object({
   dueDate: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (use YYYY-MM-DD)')
+    .refine((v) => !isNaN(Date.parse(v)), 'Invalid date')
     .optional()
     .nullable(),
   assignee: z.string().optional().nullable(),

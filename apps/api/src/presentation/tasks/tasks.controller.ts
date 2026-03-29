@@ -88,9 +88,8 @@ export class TasksController {
   @ApiResponse({ status: 404, description: 'Task not found' })
   async update(
     @Param('id') id: string,
-    @Body() body: UpdateTaskDto,
+    @Body(new ZodValidationPipe(UpdateTaskSchema)) dto: UpdateTaskDto,
   ): Promise<TaskResponseDto> {
-    const dto = UpdateTaskSchema.parse(body);
     const task = await this.updateTask.execute(id, dto);
     return TaskResponseDto.fromEntity(task);
   }
