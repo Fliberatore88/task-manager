@@ -22,9 +22,9 @@ describe('TaskEntity', () => {
     });
 
     it('should throw when title is shorter than 3 characters', () => {
-      expect(() =>
-        TaskEntity.create({ ...validProps, title: 'AB' }),
-      ).toThrow('Title must be at least 3 characters');
+      expect(() => TaskEntity.create({ ...validProps, title: 'AB' })).toThrow(
+        'Title must be at least 3 characters',
+      );
     });
 
     it('should throw when title is longer than 100 characters', () => {
@@ -64,7 +64,10 @@ describe('TaskEntity', () => {
   describe('update', () => {
     it('should return a new entity with updated fields', () => {
       const task = TaskEntity.create(validProps);
-      const updated = task.update({ title: 'Updated title', status: 'in-progress' });
+      const updated = task.update({
+        title: 'Updated title',
+        status: 'in-progress',
+      });
 
       expect(updated.title).toBe('Updated title');
       expect(updated.status).toBe('in-progress');

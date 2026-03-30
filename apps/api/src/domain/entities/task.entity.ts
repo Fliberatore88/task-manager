@@ -58,12 +58,14 @@ export class TaskEntity {
 
   update(props: Partial<Omit<TaskProps, 'id' | 'createdAt'>>): TaskEntity {
     if (props.title !== undefined) TaskEntity.validateTitle(props.title);
-    if (props.description !== undefined) TaskEntity.validateDescription(props.description);
+    if (props.description !== undefined)
+      TaskEntity.validateDescription(props.description);
 
     return new TaskEntity({
       id: this.id,
       title: props.title ?? this.title,
-      description: props.description !== undefined ? props.description : this.description,
+      description:
+        props.description !== undefined ? props.description : this.description,
       status: props.status ?? this.status,
       priority: props.priority ?? this.priority,
       dueDate: props.dueDate !== undefined ? props.dueDate : this.dueDate,

@@ -174,13 +174,17 @@ npm run dev:web
 
 ## Tests
 
-Tests run against the backend only (unit tests for domain entities and use cases, with repository mocked). No database required.
-
 ```bash
 source ~/.nvm/nvm.sh && nvm use 20
-npm test             # run all tests once
+npm test             # run all tests once (API + Web)
 npm run test:watch   # watch mode
 ```
+
+**Backend (30 tests):** Unit tests for the domain entity (`TaskEntity` — creation, validation, immutability, overdue logic) and all six use cases (mocked repository, no database required).
+
+**Frontend (23 tests):** Utility functions (`cn`, `formatDate`, `isOverdue`), API client layer (mocked Axios, verifies endpoints and params), and component tests (`TaskForm` — rendering, defaults, Zod validation, submit flow, edit pre-fill).
+
+The frontend tests caught a real bug: HTML date inputs send `""` when empty, but the Zod schema's `.optional()` only handles `undefined` — the regex validation rejected empty dates. Fixed with `z.preprocess` to normalize empty strings to `undefined` in the shared schema.
 
 ---
 
@@ -219,15 +223,15 @@ See [AI_COLLABORATION.md](./AI_COLLABORATION.md) for prompts, approach, and less
 
 Using Claude Code as a pair programmer accelerated implementation significantly — but the value came from how it was used, not just that it was used.
 
-The key discipline was arriving at the tool with architectural decisions already made. Clean Architecture layers, the monorepo shape, the stats-before-id routing constraint, the shared Zod schema strategy — all of these were defined before the first prompt. Claude's role was to execute those decisions at speed and validate edge cases.
+The approach was spec-driven: the PDF assessment served as the design document. Requirements were extracted and validated before writing code. Architecture decisions — Clean Architecture layers, monorepo shape, shared Zod schemas, stats-before-id routing — were all defined before the first prompt. Claude's role was to execute those decisions at speed and validate edge cases.
 
-TDD worked particularly well for the domain layer. Writing the `TaskEntity` spec before the implementation forced a clean interface: the test revealed that `update()` needed to return a new instance (immutability), not mutate in place. Without the spec-first discipline, that decision might have been deferred and harder to retrofit. The AI's strength in TDD is generating comprehensive test cases quickly — it thought of the `isOverdue` edge case (completed tasks with past due dates) without being prompted.
+TDD worked particularly well for the domain layer. Writing `task.entity.spec.ts` before `task.entity.ts` forced the interface to be designed from the consumer's perspective. The test defined the contract: `create()` validates, `update()` returns a new instance (immutability), `isOverdue()` excludes completed tasks. Without spec-first discipline, the immutability decision might have been deferred and harder to retrofit. The AI's strength in TDD is generating comprehensive edge cases quickly — it caught the `isOverdue` scenario for completed tasks with past due dates without being prompted.
 
-The clearest limitation: the AI doesn't remember architectural decisions across context. Without explicit instructions in `CLAUDE.md`, it would drift toward simpler patterns (e.g., putting business logic in the controller). Persistent instruction files are essential for maintaining coherence in longer sessions.
+On the frontend, testing paid off concretely: writing `TaskForm` component tests revealed a real bug in the shared Zod schema. HTML date inputs send `""` when empty, but `.optional()` only handles `undefined` — the regex rejected empty dates silently. The fix (`z.preprocess` to normalize empty strings) improved both the API and the form in one change. Tests finding real bugs is the strongest argument for writing them.
 
-The biggest DX win was the shared Zod package. That architectural decision — prompted explicitly — eliminated an entire class of frontend/backend type drift that would otherwise require manual synchronization.
+The clearest limitation: the AI doesn't retain architectural decisions across context windows. Without `CLAUDE.md` instructions, it drifts toward simpler patterns (business logic in controllers, skipping the DTO mapper). Persistent instruction files are essential for maintaining coherence in longer sessions.
 
-**Estimated time saved:** ~60% of implementation time, mostly on boilerplate (Prisma wiring, Swagger decorators, form validation setup). Architecture and debugging remained human-driven.
+**Estimated time saved:** ~60% of implementation time, mostly on boilerplate (Prisma wiring, Swagger decorators, form validation setup). Architecture, debugging, and design decisions remained human-driven.
 
 ---
 

@@ -5,7 +5,8 @@ export class TaskResponseDto {
   @ApiProperty() id: string;
   @ApiProperty() title: string;
   @ApiProperty({ nullable: true }) description: string | null;
-  @ApiProperty({ enum: ['pending', 'in-progress', 'completed'] }) status: string;
+  @ApiProperty({ enum: ['pending', 'in-progress', 'completed'] })
+  status: string;
   @ApiProperty({ enum: ['low', 'medium', 'high'] }) priority: string;
   @ApiProperty({ nullable: true }) dueDate: string | null;
   @ApiProperty({ nullable: true }) assignee: string | null;
@@ -25,10 +26,4 @@ export class TaskResponseDto {
     dto.updatedAt = entity.updatedAt.toISOString();
     return dto;
   }
-}
-
-export class TaskStatsResponseDto {
-  @ApiProperty() total: number;
-  @ApiProperty() byStatus: { pending: number; 'in-progress': number; completed: number };
-  @ApiProperty() byPriority: { low: number; medium: number; high: number };
 }

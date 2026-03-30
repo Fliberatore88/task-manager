@@ -1,7 +1,7 @@
 # AI Collaboration Artifacts
 
 **Developer:** federico.liberatore
-**Tool:** Claude Code (claude-sonnet-4-6) via CLI
+**Tool:** Claude Code via CLI
 **Project:** Task Manager — Technical Assessment
 
 ---
@@ -76,6 +76,16 @@ These are representative of how I drove the session. Prompts were conversational
 
 ---
 
+### Prompt 7 — Frontend testing and the bug it found
+
+> "Set up Jest + Testing Library for the web app. Write tests for the utility functions, the API client layer (mock Axios), and a component test for TaskForm — it should verify rendering, Zod validation errors, and submit flow with pre-filled edit data."
+
+**Why this prompt:** The backend had 30 tests but the frontend had zero. Even a solid base of component and unit tests demonstrates testing capability and catches real issues.
+
+**What happened:** The `TaskForm` submit test failed immediately. The Zod schema rejected form submissions when the date field was left empty — HTML date inputs send `""`, but `z.string().optional()` only skips `undefined`, not empty strings. The regex validation rejected `""` silently. Fixed with `z.preprocess(emptyToUndefined, ...)` in the shared schema — one change that improved both API and form behavior. This is the kind of bug that only surfaces under test: the browser's native date picker masks it because users either pick a date or leave the field untouched.
+
+---
+
 ## Lessons Learned
 
 1. **Prompts that ask for justification produce better code.** Asking "explain the tradeoff" catches when the AI defaults to a simpler but wrong approach.
@@ -89,3 +99,13 @@ These are representative of how I drove the session. Prompts were conversational
 5. **The AI is a fast typist, not an architect.** Every structural decision in this project — Clean Architecture layers, monorepo shape, SQLite for zero-config, stats-before-id routing — was made before the first prompt. The AI executed those decisions efficiently.
 
 6. **Next.js config is build-time, not runtime.** `next.config.ts` rewrites are evaluated during `next build` and baked into `.next/required-server-files.json`. Docker Compose `environment:` variables arrive at runtime — too late. The correct pattern is to pass the API URL as a Docker build `ARG`, which makes it available during the build stage where Next.js needs it. This is why `API_URL` is a build arg pointing to the internal Docker service name (`http://api:3001`) rather than a runtime env var.
+
+7. **Frontend tests find bugs that manual testing misses.** The `TaskForm` component test caught a Zod schema bug where empty HTML date inputs (`""`) failed regex validation. In the browser, the native date picker masks this because users either select a date or never focus the field. Under test, `userEvent.click(submit)` with an empty date input exposed the mismatch between HTML form semantics and Zod's `.optional()`.
+
+---
+
+## What I'd Do Differently
+
+- **Start with e2e endpoint tests.** I'd add a small supertest suite that validates the API contract (correct status codes, response shapes, error formats) before connecting the frontend. This catches serialization and routing issues early.
+- **Integration tests for the repository.** The Prisma repository has non-trivial logic (raw SQL for priority sorting, stats aggregation). Unit tests with mocked repos verify use cases, but don't verify that the SQL actually works. An in-memory SQLite test database would cover this gap cheaply.
+- **TDD more aggressively on the frontend.** I applied TDD on the domain layer but wrote frontend tests after implementation. Writing the `TaskForm` test first would have caught the empty-date Zod bug before it existed.

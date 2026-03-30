@@ -1,4 +1,9 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpStatus,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { ZodError } from 'zod';
 
@@ -11,7 +16,9 @@ export class ZodExceptionFilter implements ExceptionFilter {
     response.status(HttpStatus.BAD_REQUEST).json({
       statusCode: HttpStatus.BAD_REQUEST,
       error: 'Bad Request',
-      message: exception.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join('; '),
+      message: exception.errors
+        .map((e) => `${e.path.join('.')}: ${e.message}`)
+        .join('; '),
     });
   }
 }

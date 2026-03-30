@@ -21,8 +21,8 @@ packages/shared/  → Zod schemas + TypeScript types shared by both apps
 ## Key Conventions
 - All validation uses Zod (shared schemas in `packages/shared`)
 - `GET /api/tasks/stats` MUST be registered before `GET /api/tasks/:id` in the controller
-- Database: SQLite via Prisma (`apps/api/prisma/dev.db`, gitignored)
-- Tests: Jest, unit tests for domain entities and use cases, mock the repository interface
+- Database: SQLite via Prisma (local: `apps/api/prisma/dev.db`, Docker: `/app/data/data.db`, both gitignored)
+- Tests: Jest — backend unit tests (domain entities + use cases, mocked repos), frontend tests (utils, API client, component tests with Testing Library)
 
 ## Node Version — CRITICAL
 Both apps require **Node 20+**. The system default may be Node 18.

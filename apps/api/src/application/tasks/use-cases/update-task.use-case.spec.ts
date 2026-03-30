@@ -49,7 +49,9 @@ describe('UpdateTaskUseCase', () => {
   it('should throw NotFoundException when task does not exist', async () => {
     mockRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('non-existent', { title: 'X' })).rejects.toThrow(NotFoundException);
+    await expect(
+      useCase.execute('non-existent', { title: 'X' }),
+    ).rejects.toThrow(NotFoundException);
     expect(mockRepository.update).not.toHaveBeenCalled();
   });
 

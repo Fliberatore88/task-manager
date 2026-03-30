@@ -43,21 +43,40 @@ export class TasksController {
 
   // NOTE: 'stats' must come before ':id' to avoid Express treating "stats" as an ID
   @Get('stats')
-  @ApiOperation({ summary: 'Get task statistics grouped by status and priority' })
-  @ApiResponse({ status: 200, description: 'Task counts grouped by status and priority' })
+  @ApiOperation({
+    summary: 'Get task statistics grouped by status and priority',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Task counts grouped by status and priority',
+  })
   async stats(): Promise<TaskStats> {
     return this.getStats.execute();
   }
 
   @Get()
   @ApiOperation({ summary: 'List all tasks with optional filters and sorting' })
-  @ApiQuery({ name: 'status', required: false, enum: ['pending', 'in-progress', 'completed'] })
-  @ApiQuery({ name: 'priority', required: false, enum: ['low', 'medium', 'high'] })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['pending', 'in-progress', 'completed'],
+  })
+  @ApiQuery({
+    name: 'priority',
+    required: false,
+    enum: ['low', 'medium', 'high'],
+  })
   @ApiQuery({ name: 'assignee', required: false })
-  @ApiQuery({ name: 'sortBy', required: false, enum: ['dueDate', 'priority', 'createdAt'] })
+  @ApiQuery({
+    name: 'sortBy',
+    required: false,
+    enum: ['dueDate', 'priority', 'createdAt'],
+  })
   @ApiQuery({ name: 'sortOrder', required: false, enum: ['asc', 'desc'] })
   @ApiResponse({ status: 200, type: [TaskResponseDto] })
-  async list(@Query() query: Record<string, string>): Promise<TaskResponseDto[]> {
+  async list(
+    @Query() query: Record<string, string>,
+  ): Promise<TaskResponseDto[]> {
     const filters = TaskFilterSchema.parse(query);
     const tasks = await this.listTasks.execute(filters);
     return tasks.map(TaskResponseDto.fromEntity);

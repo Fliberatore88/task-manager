@@ -33,10 +33,16 @@ describe('ListTasksUseCase', () => {
   });
 
   it('should return tasks from the repository', async () => {
-    const tasks = [makeTask({ id: 'uuid-1' }), makeTask({ id: 'uuid-2', title: 'Second' })];
+    const tasks = [
+      makeTask({ id: 'uuid-1' }),
+      makeTask({ id: 'uuid-2', title: 'Second' }),
+    ];
     mockRepository.findAll.mockResolvedValue(tasks);
 
-    const filters = { sortBy: 'createdAt' as const, sortOrder: 'desc' as const };
+    const filters = {
+      sortBy: 'createdAt' as const,
+      sortOrder: 'desc' as const,
+    };
     const result = await useCase.execute(filters);
 
     expect(result).toBe(tasks);
@@ -46,7 +52,11 @@ describe('ListTasksUseCase', () => {
   it('should return an empty array when no tasks match', async () => {
     mockRepository.findAll.mockResolvedValue([]);
 
-    const filters = { status: 'completed' as const, sortBy: 'createdAt' as const, sortOrder: 'desc' as const };
+    const filters = {
+      status: 'completed' as const,
+      sortBy: 'createdAt' as const,
+      sortOrder: 'desc' as const,
+    };
     const result = await useCase.execute(filters);
 
     expect(result).toEqual([]);

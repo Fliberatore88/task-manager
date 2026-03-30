@@ -24,13 +24,15 @@ COPY apps/web/ ./apps/web/
 RUN npm run build --workspace=packages/shared && \
     npm run build --workspace=apps/web
 
+# Remove devDependencies so the runtime image only carries production deps
+RUN npm prune --omit=dev
+
 # ── Stage 2: Runtime ────────────────────────────────────────────────
 FROM node:20-slim AS runner
 
 WORKDIR /app
 
 # Copy only the built Next.js output and its runtime dependencies
-# (npm workspaces hoists all packages to root node_modules — no workspace-level node_modules)
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder /app/packages/shared/package.json ./packages/shared/package.json

@@ -10,9 +10,6 @@ export const tasksApi = {
   list: (filters?: Partial<TaskFilterDto>) =>
     api.get<Task[]>('/api/tasks', { params: filters }).then((r) => r.data),
 
-  getById: (id: string) =>
-    api.get<Task>(`/api/tasks/${id}`).then((r) => r.data),
-
   create: (dto: CreateTaskDto) =>
     api.post<Task>('/api/tasks', dto).then((r) => r.data),
 

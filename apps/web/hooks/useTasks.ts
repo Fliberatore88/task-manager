@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { tasksApi } from '@/lib/api/tasks';
 import type { Task, TaskFilterDto, TaskStats, CreateTaskDto, UpdateTaskDto } from '@task-manager/shared';
 
@@ -10,13 +10,15 @@ export function useTasks(initialFilters: Partial<TaskFilterDto> = {}) {
   const [filters, setFilters] = useState<Partial<TaskFilterDto>>(initialFilters);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const hasFetched = useRef(false);
 
   const fetchTasks = useCallback(async () => {
     try {
-      setLoading(true);
+      if (!hasFetched.current) setLoading(true);
       setError(null);
       const data = await tasksApi.list(filters);
       setTasks(data);
+      hasFetched.current = true;
     } catch {
       setError('Failed to load tasks. Is the API running?');
     } finally {

@@ -46,7 +46,9 @@ describe('DeleteTaskUseCase', () => {
   it('should throw NotFoundException when task does not exist', async () => {
     mockRepository.findById.mockResolvedValue(null);
 
-    await expect(useCase.execute('non-existent')).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute('non-existent')).rejects.toThrow(
+      NotFoundException,
+    );
     expect(mockRepository.delete).not.toHaveBeenCalled();
   });
 });

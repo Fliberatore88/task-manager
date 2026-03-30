@@ -1,6 +1,9 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { ITaskRepository, TASK_REPOSITORY } from '../../../domain/repositories/task.repository.interface';
+import {
+  ITaskRepository,
+  TASK_REPOSITORY,
+} from '../../../domain/repositories/task.repository.interface';
 import { TaskEntity } from '../../../domain/entities/task.entity';
 import { CreateTaskDto } from '@task-manager/shared';
 

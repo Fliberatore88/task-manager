@@ -19,7 +19,11 @@ describe('CreateTaskUseCase', () => {
   });
 
   it('should create a task and persist it via the repository', async () => {
-    const dto = { title: 'New Task', status: 'pending' as const, priority: 'medium' as const };
+    const dto = {
+      title: 'New Task',
+      status: 'pending' as const,
+      priority: 'medium' as const,
+    };
 
     mockRepository.create.mockImplementation(async (task) => task);
 
@@ -32,7 +36,11 @@ describe('CreateTaskUseCase', () => {
   });
 
   it('should set default status to pending and priority to medium', async () => {
-    const dto = { title: 'Minimal Task', status: 'pending' as const, priority: 'medium' as const };
+    const dto = {
+      title: 'Minimal Task',
+      status: 'pending' as const,
+      priority: 'medium' as const,
+    };
     mockRepository.create.mockImplementation(async (task) => task);
 
     const result = await useCase.execute(dto);
@@ -42,7 +50,11 @@ describe('CreateTaskUseCase', () => {
   });
 
   it('should generate a unique id for each task', async () => {
-    const dto = { title: 'Task One', status: 'pending' as const, priority: 'medium' as const };
+    const dto = {
+      title: 'Task One',
+      status: 'pending' as const,
+      priority: 'medium' as const,
+    };
     mockRepository.create.mockImplementation(async (task) => task);
 
     const result1 = await useCase.execute(dto);
@@ -52,7 +64,11 @@ describe('CreateTaskUseCase', () => {
   });
 
   it('should propagate repository errors', async () => {
-    const dto = { title: 'Failing Task', status: 'pending' as const, priority: 'medium' as const };
+    const dto = {
+      title: 'Failing Task',
+      status: 'pending' as const,
+      priority: 'medium' as const,
+    };
     mockRepository.create.mockRejectedValue(new Error('DB error'));
 
     await expect(useCase.execute(dto)).rejects.toThrow('DB error');

@@ -10,7 +10,7 @@
     "dev:api": "npm run dev --workspace=apps/api",
     "dev:web": "npm run dev --workspace=apps/web",
     "build": "npm run build --workspace=packages/shared && npm run build --workspace=apps/api && npm run build --workspace=apps/web",
-    "test": "npm run test --workspace=apps/api",
+    "test": "npm run test -w apps/api && npm run test -w apps/web",
     "test:watch": "npm run test:watch --workspace=apps/api",
     "lint": "npm run lint --workspace=apps/api && npm run lint --workspace=apps/web"
   },

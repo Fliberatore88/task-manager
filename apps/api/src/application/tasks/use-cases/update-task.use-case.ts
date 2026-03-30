@@ -1,5 +1,8 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { ITaskRepository, TASK_REPOSITORY } from '../../../domain/repositories/task.repository.interface';
+import {
+  ITaskRepository,
+  TASK_REPOSITORY,
+} from '../../../domain/repositories/task.repository.interface';
 import { TaskEntity } from '../../../domain/entities/task.entity';
 import { UpdateTaskDto } from '@task-manager/shared';
 
@@ -17,10 +20,14 @@ export class UpdateTaskUseCase {
 
     const updated = existing.update({
       ...(dto.title !== undefined && { title: dto.title }),
-      ...(dto.description !== undefined && { description: dto.description ?? null }),
+      ...(dto.description !== undefined && {
+        description: dto.description ?? null,
+      }),
       ...(dto.status !== undefined && { status: dto.status }),
       ...(dto.priority !== undefined && { priority: dto.priority }),
-      ...(dto.dueDate !== undefined && { dueDate: dto.dueDate ? new Date(dto.dueDate) : null }),
+      ...(dto.dueDate !== undefined && {
+        dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+      }),
       ...(dto.assignee !== undefined && { assignee: dto.assignee ?? null }),
       updatedAt: new Date(),
     });

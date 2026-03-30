@@ -1,5 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { ITaskRepository, TASK_REPOSITORY } from '../../../domain/repositories/task.repository.interface';
+import {
+  ITaskRepository,
+  TASK_REPOSITORY,
+} from '../../../domain/repositories/task.repository.interface';
 import { TaskStats } from '@task-manager/shared';
 
 @Injectable()

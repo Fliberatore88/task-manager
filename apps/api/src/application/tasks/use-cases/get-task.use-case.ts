@@ -1,5 +1,8 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
-import { ITaskRepository, TASK_REPOSITORY } from '../../../domain/repositories/task.repository.interface';
+import {
+  ITaskRepository,
+  TASK_REPOSITORY,
+} from '../../../domain/repositories/task.repository.interface';
 import { TaskEntity } from '../../../domain/entities/task.entity';
 
 @Injectable()

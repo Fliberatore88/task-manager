@@ -3,24 +3,29 @@ import { z } from 'zod';
 export const TaskStatusSchema = z.enum(['pending', 'in-progress', 'completed']);
 export const TaskPrioritySchema = z.enum(['low', 'medium', 'high']);
 
+const emptyToUndefined = (v: unknown) => (v === '' ? undefined : v);
+
 export const CreateTaskSchema = z.object({
   title: z
     .string()
     .min(3, 'Title must be at least 3 characters')
     .max(100, 'Title must be at most 100 characters'),
-  description: z
-    .string()
-    .max(500, 'Description must be at most 500 characters')
-    .optional(),
+  description: z.preprocess(
+    emptyToUndefined,
+    z.string().max(500, 'Description must be at most 500 characters').optional(),
+  ),
   status: TaskStatusSchema.default('pending'),
   priority: TaskPrioritySchema.default('medium'),
-  dueDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (use YYYY-MM-DD)')
-    .refine((v) => !isNaN(Date.parse(v)), 'Invalid date')
-    .optional()
-    .nullable(),
-  assignee: z.string().optional().nullable(),
+  dueDate: z.preprocess(
+    emptyToUndefined,
+    z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format (use YYYY-MM-DD)')
+      .refine((v) => !isNaN(Date.parse(v)), 'Invalid date')
+      .optional()
+      .nullable(),
+  ),
+  assignee: z.preprocess(emptyToUndefined, z.string().optional().nullable()),
 });
 
 export const UpdateTaskSchema = CreateTaskSchema.partial();
