@@ -8,7 +8,7 @@ services:
     environment:
       DATABASE_URL: file:/app/data/dev.db
       PORT: "3001"
-      FRONTEND_URL: http://localhost:3000
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
       NODE_ENV: production
     volumes:
       - db-data:/app/data
@@ -24,13 +24,14 @@ services:
       context: .
       dockerfile: Dockerfile.web
       args:
-        # Override for access from other devices on the network:
-        #   NEXT_PUBLIC_API_URL=http://<your-ip>:3001 docker compose up --build
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+        API_URL: http://api:3001
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: production
+      # Internal Docker network URL — the web container proxies /api/* to the api service.
+      # No need to change this; access from any device on the network just works.
+      API_URL: http://api:3001
     depends_on:
       api:
         condition: service_healthy

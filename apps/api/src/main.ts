@@ -9,9 +9,7 @@ async function bootstrap() {
   app.useGlobalFilters(new ZodExceptionFilter());
 
   app.enableCors({
-    origin: process.env.NODE_ENV === 'production'
-      ? process.env.FRONTEND_URL
-      : true, // allow all origins in development
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
   });
 

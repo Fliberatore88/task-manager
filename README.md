@@ -88,11 +88,14 @@ The database persists in a named Docker volume (`db-data`) — data survives con
 
 **Accessing from other devices on the same network** (phone, tablet):
 
-Find your machine's local IP (`ip addr` / `ifconfig` / System Preferences → Network), then:
+Just use your machine's local IP or hostname — no extra configuration needed:
 
-```bash
-NEXT_PUBLIC_API_URL=http://<your-ip>:3001 docker compose up --build
 ```
+http://<your-ip>:3000
+http://<your-hostname>.local:3000   # mDNS, works on most networks
+```
+
+The web container proxies all `/api/*` requests to the API internally via Docker's network (`http://api:3001`), so the host IP is irrelevant to the setup.
 
 **Useful commands:**
 
@@ -127,10 +130,9 @@ FRONTEND_URL=http://localhost:3000
 
 **`apps/web/.env.local`**
 ```
-NEXT_PUBLIC_API_URL=http://localhost:3001
+# No required variables — Next.js proxies /api/* to the API in dev mode too.
+# Add overrides here only if running the API on a non-default port.
 ```
-
-> For access from other devices on the network, set `NEXT_PUBLIC_API_URL=http://<your-ip>:3001` in `apps/web/.env.local`.
 
 #### Step 2 — Install and build
 

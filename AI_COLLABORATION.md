@@ -64,6 +64,18 @@ These are representative of how I drove the session. Prompts were conversational
 
 ---
 
+### Prompt 6 — API access from any device without CORS or hardcoded IPs
+
+> "The Docker setup works locally but accessing from another device requires rebuilding with a hardcoded IP — that doesn't scale. What's the production-grade pattern for a Next.js frontend proxying to a containerized API without coupling the build to the host machine's network?"
+
+**Why this prompt:** The naive Docker setup embeds the host IP at build time, breaking on any other machine or when the IP changes. CORS configuration is the wrong layer to solve a networking topology problem.
+
+**What I validated:** Using Next.js `rewrites()` in `next.config.ts` to proxy `/api/*` → `http://api:3001` (Docker's internal service name). The browser only ever talks to port 3000 — same origin, no CORS involved. The internal proxy target uses the Docker Compose service name, which is stable regardless of the host machine's IP.
+
+**Tradeoff acknowledged:** `next.config.ts` rewrites are evaluated at build time (see lesson 7), so `API_URL` must be passed as a Docker build ARG, not a runtime environment variable.
+
+---
+
 ## Lessons Learned
 
 1. **Prompts that ask for justification produce better code.** Asking "explain the tradeoff" catches when the AI defaults to a simpler but wrong approach.
@@ -75,3 +87,5 @@ These are representative of how I drove the session. Prompts were conversational
 4. **Shared package is the biggest DX win.** Writing Zod once and having it in both `ZodValidationPipe` (backend) and `zodResolver` (frontend) eliminated an entire class of backend/frontend type drift.
 
 5. **The AI is a fast typist, not an architect.** Every structural decision in this project — Clean Architecture layers, monorepo shape, SQLite for zero-config, stats-before-id routing — was made before the first prompt. The AI executed those decisions efficiently.
+
+6. **Next.js config is build-time, not runtime.** `next.config.ts` rewrites are evaluated during `next build` and baked into `.next/required-server-files.json`. Docker Compose `environment:` variables arrive at runtime — too late. The correct pattern is to pass the API URL as a Docker build `ARG`, which makes it available during the build stage where Next.js needs it. This is why `API_URL` is a build arg pointing to the internal Docker service name (`http://api:3001`) rather than a runtime env var.
